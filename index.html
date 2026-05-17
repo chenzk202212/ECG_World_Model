@@ -275,7 +275,7 @@
           </h2>
 
           <div class="is-size-5 publication-authors">
-            <span class="author-block">Zhikang Chen<sup>1,*</sup>,</span>
+            <span class="author-block">Zhikang Chen<sup>1*</sup>,</span>
             <span class="author-block">Yue Wang<sup>2</sup>,</span>
             <span class="author-block">Sen Cui<sup>2</sup>,</span>
             <span class="author-block">Yu Zhang<sup>3</sup>,</span>
@@ -289,7 +289,7 @@
           
           <div class="is-size-6 has-text-centered" style="margin-top: 15px; margin-bottom: 8px;">
             <span class="author-block"><sup>1</sup>University of Oxford,</span>
-            <span class="author-block"><sup>2</sup>Tsinghua University</span>
+            <span class="author-block"><sup>2</sup>Tsinghua University,</span>
             <span class="author-block"><sup>3</sup>Southern University of Science and Technology</span>
           </div>
           
@@ -302,20 +302,68 @@
 
           <div class="column has-text-centered">
             <div class="publication-links">
+          
+              <!-- Paper -->
               <span class="link-block">
-                <a href="#" target="_blank" class="external-link button is-normal is-rounded is-dark button-gap">
+                <a href="#" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark button-gap">
                   <span class="icon"><i class="fas fa-file-pdf"></i></span>
                   <span>Paper</span>
                 </a>
               </span>
+          
+              <!-- Code -->
               <span class="link-block">
-                <a class="button is-normal is-rounded is-dark button-gap" style="opacity: 0.6; cursor: default;">
+                <a id="code-btn"
+                   class="button is-normal is-rounded is-dark button-gap">
                   <span class="icon"><i class="fab fa-github"></i></span>
-                  <span>Code (Coming Soon)</span>
+                  <span>Code</span>
                 </a>
               </span>
+          
             </div>
           </div>
+          
+          <!-- Toast -->
+          <div id="toast"
+               style="
+                 visibility:hidden;
+                 min-width:220px;
+                 background:#333;
+                 color:#fff;
+                 text-align:center;
+                 border-radius:8px;
+                 padding:12px 20px;
+                 position:fixed;
+                 z-index:9999;
+                 left:50%;
+                 bottom:40px;
+                 transform:translateX(-50%);
+                 opacity:0;
+                 transition:opacity 0.3s, bottom 0.3s;
+               ">
+            🚧 Code will be released soon!
+          </div>
+          
+          <script>
+            const btn = document.getElementById("code-btn");
+            const toast = document.getElementById("toast");
+          
+            btn.addEventListener("click", function () {
+              toast.style.visibility = "visible";
+              toast.style.opacity = "1";
+              toast.style.bottom = "60px";
+          
+              setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.bottom = "40px";
+          
+                setTimeout(() => {
+                  toast.style.visibility = "hidden";
+                }, 300);
+              }, 2000);
+            });
+          </script>
 
         </div>
       </div>
