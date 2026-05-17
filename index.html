@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="ECG-WM: A Physiology-Informed ECG World Model for Clinical Intervention Simulation">
+  <meta name="keywords" content="ECG, World Model, Diffusion, Cardiac Electrophysiology, Drug Response, Simulation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ECG-WM: A Physiology-Informed ECG World Model for Clinical Intervention Simulation</title>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #fcfcfc;
+    }
+    .video-slider-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      width: 100%;
+    }
+    .arrow-btn {
+      background: none;
+      border: none;
+      font-size: 2.5rem;
+      color: #b5b5b5;
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+      padding: 0 10px;
+    }
+    .arrow-btn:hover {
+      color: #3273dc;
+      transform: scale(1.1);
+    }
+    .horizontal-menu {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .horizontal-menu .vertical-item {
+      width: 120px;
+      flex-shrink: 1;
+    }
+    .flow-arrow {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      animation: bounce-color 1.5s infinite ease-in-out;
+    }
+    @keyframes bounce-color {
+      0%, 100% { transform: translateX(-5px); color: #87cefa; }
+      50% { transform: translateX(5px); color: #1d4ed8; }
+    }
+    .simple-grid-menu {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 20px;
+      width: 80%;
+      margin-top: 20px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .simple-grid-menu .vertical-item {
+      width: 100%;
+      flex-shrink: 1;
+    }
+    .gray-box-container {
+      background-color: #f5f5f5;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .video-wrapper {
+      text-align: center;
+    }
+    .video-wrapper h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #4a4a4a;
+    }
+    .video-wrapper video {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #000;
+    }
+    .vertical-item {
+      cursor: pointer;
+      border: 3px solid transparent;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      opacity: 0.7;
+    }
+    .vertical-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+    .vertical-item:hover {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+    .vertical-item.active {
+      opacity: 1;
+      border-color: #3273dc;
+      box-shadow: 0 2px 8px rgba(50, 115, 220, 0.4);
+    }
+    .vertical-caption {
+      background: #fff;
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 3px;
+      font-weight: bold;
+      color: #555;
+    }
+    .title-color {
+      background: linear-gradient(45deg, #e45858, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .subtitle-small {
+      font-size: 1.5rem !important;
+      margin-top: 10px !important;
+      font-weight: 400;
+      color: #4a4a4a;
+    }
+    .publication-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .button-gap { margin: 5px; }
+    .section { padding: 3rem 1.5rem; }
+    .container.is-max-desktop { max-width: 960px; }
+    .video-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .video-grid-3 {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 0px;
+    }
+    video {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .citation-box {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .top-bg-wrapper {
+      position: relative;
+      background-color: #f0f4f9;
+      padding-bottom: 2rem;
+    }
+    .bg-layer {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-grid-3d {
+      position: absolute;
+      top: 10%;
+      left: -50%;
+      width: 200%;
+      height: 150%;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.9) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.9) 2px, transparent 2px);
+      background-size: 80px 80px;
+      transform: perspective(1000px) rotateX(72deg);
+      transform-origin: top center;
+    }
+    .wireframe-obj {
+      position: absolute;
+      opacity: 0.8;
+    }
+    .wireframe-obj svg {
+      animation: float-up-down 6s ease-in-out infinite;
+    }
+    @keyframes float-up-down {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    .obj-ecg1 { top: 25%; left: 10%; }
+    .obj-ecg1 svg { width: 120px; height: 80px; }
+    .obj-ecg2 { top: 30%; right: 12%; }
+    .obj-ecg2 svg {
+      width: 140px; height: 90px;
+      animation-delay: -3s;
+    }
+    .bg-fade {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%; height: 350px;
+      background: linear-gradient(to bottom, rgba(252,252,252,0) 0%, #fcfcfc 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .content-layer {
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- =============================================
+     顶部 3D 背景区域
+============================================== -->
+<div class="top-bg-wrapper">
+  <div class="bg-layer">
+    <div class="bg-grid-3d"></div>
+    <!-- ECG 波形风格线框装饰 -->
+    <div class="wireframe-obj obj-ecg1">
+      <svg viewBox="0 0 120 80" fill="none" stroke="#ffffff" stroke-width="2">
+        <polyline points="0,40 20,40 25,40 28,20 31,65 34,40 40,40 60,40 120,40"
+          fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+        <polyline points="0,55 20,55 25,55 28,35 31,80 34,55 40,55 60,55 120,55"
+          fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="wireframe-obj obj-ecg2">
+      <svg viewBox="0 0 140 90" fill="none" stroke="#ffffff" stroke-width="2">
+        <polyline points="0,45 25,45 30,45 33,25 36,70 39,45 45,45 70,45 140,45"
+          fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+        <polyline points="0,60 25,60 30,60 33,40 36,85 39,60 45,60 70,60 140,60"
+          fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="bg-fade"></div>
+
+  <div class="content-layer">
+
+<!-- ========== Header ========== -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop" style="margin-top: 40px;">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+            <span class="title-color">ECG-WM</span>: A Physiology-Informed ECG World Model for Clinical Intervention Simulation
+          </h1>
+          <h2 class="subtitle is-3 publication-subtitle subtitle-small">
+            Physiology-Informed Predictive Simulation for Action-Conditioned Cardiac Dynamics
+          </h2>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Zhikang Chen<sup>1,*</sup>,</span>
+            <span class="author-block">Yue Wang<sup>2</sup>,</span>
+            <span class="author-block">Sen Cui<sup>2</sup>,</span>
+            <span class="author-block">Yu Zhang<sup>3</sup>,</span>
+          </div>
+          
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Changshui Zhang<sup>2</sup>,</span>
+            <span class="author-block">Tianling Ren<sup>2</sup>,</span>
+            <span class="author-block">Tingting Zhu<sup>1</sup></span>
+          </div>
+          
+          <div class="is-size-6 has-text-centered" style="margin-top: 15px; margin-bottom: 8px;">
+            <span class="author-block"><sup>1</sup>University of Oxford,</span>
+            <span class="author-block"><sup>2</sup>Tsinghua University</span>
+            <span class="author-block"><sup>3</sup>Southern University of Science and Technology</span>
+          </div>
+          
+          <div class="is-size-6 has-text-centered" style="margin-bottom: 20px;">
+            <span class="author-block">
+              <sup>*</sup>Corresponding author: 
+              <a href="mailto:zhikang.chen@eng.ox.ac.uk">zhikang.chen@eng.ox.ac.uk</a>
+            </span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="#" target="_blank" class="external-link button is-normal is-rounded is-dark button-gap">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark button-gap" style="opacity: 0.6; cursor: default;">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code (Coming Soon)</span>
+                </a>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Abstract ========== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Electrocardiogram (ECG)-based models have achieved strong performance in diagnostic tasks,
+            yet they remain limited in modeling how cardiac dynamics evolve under external interventions.
+            In particular, existing approaches focus primarily on static prediction and lack mechanisms
+            to capture ECG variations under different pharmacological conditions. In this work, we propose
+            an <strong>ECG World Model</strong> for action-conditioned predictive simulation of cardiac
+            electrophysiology. Moving beyond disjoint pipelines, our framework features a
+            principled integration of physiological ordinary differential equation (ODE) priors into latent
+            diffusion dynamics via energy regularization. This structural constraint enables the synthesis
+            of physiologically plausible post-intervention ECG trajectories while effectively mitigating
+            generative hallucinations. Building on this simulation process, we introduce an uncertainty-aware
+            evaluation strategy that leverages the stochasticity of diffusion sampling to characterize both
+            the expected clinical risk and its variability, allowing a more reliable comparative assessment
+            of candidate interventions. We evaluate our method across diverse settings, including controlled
+            drug-response scenarios and real-world clinical records. Beyond standard waveform metrics,
+            experimental results demonstrate improved risk calibration and strong alignment with
+            expert-informed treatment preferences. These results establish our approach as a robust foundation
+            for safe and intervention-aware clinical decision support.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+
+<!-- =============================================
+     Section: Method Overview (Figure 2 from paper)
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method Overview</h2>
+    <div class="content has-text-centered">
+      <img src="assets/pipeline/pipeline.png" style="width: 100%; border-radius: 10px;">
+      <p class="is-size-7" style="color: #555; margin-top: 8px;">
+        Our generation paradigm integrates drug-conditioned simulation with uncertainty-aware risk evaluation. <strong>Top:</strong> Unlike the traditional prediction paradigm—which maps static patient data to a risk score without counterfactual reasoning—our method generates post-dose ECGs via a cardiac-ODE-enhanced world model, enabling actionable drug recommendations. <strong>Middle:</strong> From a pre-dose ECG, the model simulates drug-specific post-dose trajectories, evaluates them through an uncertainty-aware risk predictor, and ranks candidate interventions. <strong>Bottom:</strong> Single-step and multi-step rollout experiments show our model achieves the closest alignment with oracle ground truth compared to GPT baselines.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Method Comparison (Figure 1 from paper)
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Model Architecture</h2>
+    <div class="content has-text-centered">
+      <img src="assets/pipeline/first_figure.png" style="width: 100%; border-radius: 10px;">
+      <p class="is-size-7" style="color: #555; margin-top: 8px;">
+        Given a pre-dose ECG and a clinical query, an ECG Foundation Model extracts domain-informed features. The ODE-enhanced World Model then simulates latent cardiac dynamics forward in time via an ODE solver, producing a predicted post-dose state. A VAE decoder reconstructs the post-dose ECG waveform, while an inverse dynamics module and Action Projection head infer the drug action underlying the transition. The generated Post-dose ECG is fed into a frozen risk predictor, with a Vision-Language Model providing the final drug recommendation.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Main Experimental Results
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Experimental Results</h2>
+
+    <!-- Table 1: Latent and Signal ECG Prediction -->
+    <div class="content" style="margin-top: 40px; overflow-x: auto;">
+      <h3 class="title is-5 has-text-centered">Table 1: Post-dose ECG Prediction Error</h3>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="font-size: 0.85rem; text-align: center;">
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align: center; background: #f0f4f9; vertical-align: middle;">Method</th>
+            <th colspan="2" style="background: #f0f4f9;">Latent ECG</th>
+            <th colspan="2" style="background: #f0f4f9;">Signal ECG</th>
+          </tr>
+          <tr>
+            <th>MSE &darr;</th>
+            <th>MAE &darr;</th>
+            <th>MSE &darr;</th>
+            <th>MAE &darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Qwen2.5-VL-7B</td><td>2.148</td><td>0.368</td><td>0.195</td><td>0.201</td></tr>
+          <tr><td>GPT-5 mini</td><td>0.719</td><td>0.166</td><td>0.066</td><td>0.128</td></tr>
+          <tr><td>GPT-4o</td><td>0.550</td><td>0.414</td><td>0.578</td><td>0.386</td></tr>
+          <tr><td>GPT-3.5</td><td>0.424</td><td>0.285</td><td>0.265</td><td>0.232</td></tr>
+          <tr><td>GLM-4.5</td><td>0.095</td><td>0.164</td><td>0.062</td><td>0.125</td></tr>
+          <tr><td>MedGemma</td><td>5.655</td><td>0.899</td><td>0.561</td><td>0.349</td></tr>
+          <tr style="background: #f0f8ff; font-weight: bold;"><td><strong>Ours</strong></td><td><strong>0.045</strong></td><td>0.159</td><td><strong>0.053</strong></td><td><strong>0.110</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="is-size-7" style="color: #555; margin-top: 6px;">
+        * Post-dose ECG prediction error on the MIMIC-IV-ECG benchmark. Lower MSE/MAE indicates more accurate simulation of drug-induced ECG changes across both latent and waveform spaces.
+      </p>
+    </div>
+
+    <!-- Table 2: Performance comparison on three ECG intervals -->
+    <div class="content" style="margin-top: 40px; overflow-x: auto;">
+      <h3 class="title is-5 has-text-centered">Table 2: Performance comparison of different methods on three ECG intervals.</h3>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="font-size: 0.78rem; text-align: center;">
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align: center; background: #f0f4f9; vertical-align: middle;">Methods</th>
+            <th colspan="2" style="background: #f0f4f9;">QTc Interval</th>
+            <th colspan="2" style="background: #f0f4f9;">PR Interval</th>
+            <th colspan="2" style="background: #f0f4f9;">T<sub>peak</sub>&minus;T<sub>end</sub> Interval</th>
+          </tr>
+          <tr>
+            <th>Acc (%) &uarr;</th><th>Rec (%) &uarr;</th>
+            <th>Acc (%) &uarr;</th><th>Rec (%) &uarr;</th>
+            <th>Acc (%) &uarr;</th><th>Rec (%) &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>WGAN</td><td>75.23&plusmn;0.69</td><td>77.23&plusmn;0.71</td><td>57.67&plusmn;0.64</td><td>58.04&plusmn;0.54</td><td>85.49&plusmn;0.12</td><td>87.35&plusmn;0.16</td></tr>
+          <tr><td>StyleGAN</td><td>72.71&plusmn;1.06</td><td>74.29&plusmn;1.49</td><td>52.15&plusmn;3.54</td><td>55.35&plusmn;1.20</td><td>88.71&plusmn;1.96</td><td>90.35&plusmn;1.87</td></tr>
+          <tr><td>ECG ODE-GAN</td><td>72.81&plusmn;3.24</td><td>73.95&plusmn;2.25</td><td>54.63&plusmn;1.49</td><td>56.16&plusmn;1.39</td><td>87.03&plusmn;0.52</td><td>88.19&plusmn;0.79</td></tr>
+          <tr><td>TTS-CGAN</td><td>86.43&plusmn;1.65</td><td>87.21&plusmn;0.64</td><td>70.09&plusmn;2.08</td><td>72.82&plusmn;2.34</td><td>83.43&plusmn;1.85</td><td>85.48&plusmn;1.57</td></tr>
+          <tr><td>CECG-GAN</td><td>79.92&plusmn;1.27</td><td>82.75&plusmn;1.31</td><td>61.08&plusmn;1.43</td><td>60.62&plusmn;0.71</td><td>89.29&plusmn;0.13</td><td>91.26&plusmn;0.05</td></tr>
+          <tr><td>DiffuSETS</td><td>86.81&plusmn;0.98</td><td>90.07&plusmn;1.24</td><td>72.62&plusmn;1.34</td><td>74.20&plusmn;1.54</td><td>89.84&plusmn;0.98</td><td>92.10&plusmn;0.96</td></tr>
+          <tr><td>DADM</td><td>89.46&plusmn;1.36</td><td>93.69&plusmn;1.49</td><td>68.02&plusmn;1.14</td><td>72.26&plusmn;1.72</td><td>91.63&plusmn;0.76</td><td>93.04&plusmn;0.58</td></tr>
+          <tr style="background: #f0f8ff; font-weight: bold;">
+            <td><strong>Ours</strong></td>
+            <td><strong>90.55&plusmn;0.76</strong></td><td><strong>96.26&plusmn;0.82</strong></td>
+            <td><strong>76.04&plusmn;0.97</strong></td><td><strong>80.84&plusmn;1.24</strong></td>
+            <td><strong>94.70&plusmn;1.13</strong></td><td><strong>95.06&plusmn;0.49</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="is-size-7" style="color: #555; margin-top: 6px;">
+        * Evaluation on the ECGRDVQ and ECGDMMLD drug-response databases. A prediction is considered correct only when all three interval labels (QTc, PR, T<sub>peak</sub>&minus;T<sub>end</sub>) simultaneously match the ground truth. Our method consistently outperforms baselines, demonstrating that the physiology-informed prior effectively constrains the generative process toward clinically plausible waveforms.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Baseline Comparison & Risk Modeling
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Generalization and Risk Modeling</h2>
+
+    <div class="content has-text-centered" style="margin-top: 20px;">
+      <h3 class="title is-5">Out-of-Distribution Generalization</h3>
+      <img src="assets/compare/compare.png" style="width: 80%; border-radius: 10px;">
+      <p class="is-size-7" style="color: #555; margin-top: 8px;">
+        Cross-dataset generalization. Models trained on the controlled drug-response ECG datasets (ECGRDVQ, ECGDMMLD) are evaluated on unseen MIMIC-IV ICU patients administered Verapamil, testing robustness to comorbidity-induced distribution shifts.
+      </p>
+    </div>
+
+    <!-- Table 3: Risk Modeling -->
+    <div class="content" style="margin-top: 40px; overflow-x: auto;">
+      <h3 class="title is-5 has-text-centered">Table 3: Drug-Induced Risk Modeling</h3>
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="font-size: 0.85rem; text-align: center;">
+        <thead>
+          <tr>
+            <th style="text-align: center; background: #f0f4f9;">Core Evaluation Metric</th>
+            <th style="background: #f0f4f9;">Ours</th>
+            <th style="background: #f0f4f9;">DADM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>&Delta;Risk Pearson Correlation &uarr;</td><td><strong>0.620</strong></td><td>0.266</td></tr>
+          <tr><td>&Delta;Risk Spearman Correlation &uarr;</td><td><strong>0.598</strong></td><td>0.255</td></tr>
+          <tr><td>&Delta;Risk Sign Agreement &uarr;</td><td><strong>76%</strong></td><td>58%</td></tr>
+          <tr><td>MAE &darr;</td><td><strong>0.0973</strong></td><td>0.1291</td></tr>
+          <tr><td>RMSE &darr;</td><td><strong>0.1253</strong></td><td>0.1625</td></tr>
+        </tbody>
+      </table>
+      <p class="is-size-7" style="color: #555; margin-top: 6px;">
+        * Evaluation on 200 test samples from the MIMIC-IV-ECG cohort across five drug candidates: Propofol, Regular Insulin, Heparin Sodium, Furosemide, and Norepinephrine. &Delta;Risk Sign Agreement measures the consistency of predicted risk-change direction against clinical ground truth, reflecting alignment with expert-informed treatment preferences.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Drug-Specific Results (Interactive Slider)
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Drug Response Simulation</h2>
+    <p class="has-text-centered" style="color: #555;">
+      Comparing pre-dose and simulated post-dose ECG waveforms.
+      Use the arrows or click thumbnails below to navigate.
+    </p>
+
+    <div class="gray-box-container">
+      <div class="video-slider-container">
+        <button class="arrow-btn" onclick="prevDrugResult()">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="content has-text-centered" style="flex: 1;">
+          <img id="drug-result-img" src="assets/complex/complex1/predose.png"
+               style="width: 70%; border-radius: 10px; border: 2px solid #3273dc;">
+        </div>
+        <button class="arrow-btn" onclick="nextDrugResult()">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="horizontal-menu" id="drug-menu" style="margin-top: 30px;">
+        <div class="vertical-item active" data-id="0" onclick="switchDrugResult(0)">
+          <img src="assets/complex/complex1/predose.png" alt="Pre-dose">
+          <div class="vertical-caption">Pre-dose ECG</div>
+        </div>
+        <div class="vertical-item" data-id="1" onclick="switchDrugResult(1)">
+          <img src="assets/complex/complex1/postdose_ecg.png" alt="Post-dose">
+          <div class="vertical-caption">Post-dose (True)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Drug-Specific Detail Results
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Cross-Drug Physiological Fidelity</h2>
+
+    <div class="gray-box-container">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div class="video-wrapper">
+          <h4>Dofetilide</h4>
+          <img src="assets/complex/complex1/dofetilide.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <div class="video-wrapper">
+          <h4>Ranolazine</h4>
+          <img src="assets/complex/complex1/ranolazine.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <div class="video-wrapper">
+          <h4>Verapamil</h4>
+          <img src="assets/complex/complex1/verapamil.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+      </div>
+      <p class="is-size-7 has-text-centered" style="color: #555; margin-top: 15px;">
+        Simulated post-dose ECG waveforms under three pharmacologically distinct interventions from the ECGRDVQ and ECGDMMLD databases. Dofetilide (IKr blocker), Ranolazine (late INa blocker), and Verapamil (L-type calcium channel blocker) each induce characteristic ECG morphological changes that our model faithfully reproduces.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Missing-Lead Robustness
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Robustness to Missing ECG Leads</h2>
+
+    <!-- Part 1: Abnormal Lead Miss — 3 columns, middle split into two rows -->
+    <h3 class="title is-4 has-text-centered" style="margin-top: 30px;">Abnormal ECG Lead Recovery</h3>
+    <p class="has-text-centered" style="color: #555; margin-bottom: 20px;">
+      Post-dose ECG reconstruction when one or more leads exhibit abnormal or flat waveforms. Our model recovers physiologically consistent 12-lead signals, outperforming DADM in preserving clinically meaningful morphology.
+    </p>
+
+    <div class="gray-box-container">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: center;">
+        <!-- Left: Pre-dose ECG -->
+        <div class="video-wrapper">
+          <h4>Pre-dose ECG</h4>
+          <img src="assets/leads/abnormal/pre-dose.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <!-- Middle: Ours (top) + DADM (bottom) -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="video-wrapper">
+            <h4>Ours</h4>
+            <img src="assets/leads/abnormal/post-dose_ours.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+          </div>
+          <div class="video-wrapper">
+            <h4>DADM</h4>
+            <img src="assets/leads/abnormal/post-dose_dadm.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+          </div>
+        </div>
+        <!-- Right: True Post-dose ECG -->
+        <div class="video-wrapper">
+          <h4>True Post-dose ECG</h4>
+          <img src="assets/leads/abnormal/true_postdose.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Part 2: Single Lead Miss — 2×2 + right spanning column -->
+    <h3 class="title is-4 has-text-centered" style="margin-top: 50px;">Normal ECG Leads Reconstruction</h3>
+    <p class="has-text-centered" style="color: #555; margin-bottom: 20px;">
+      Structured evaluation across varying numbers of missing leads. Each row shows a condition (1 or 2 leads missing); each column shows a processing stage: input (Pre-dose with missing leads), model output (Generated Post-dose), and ground truth (True Post-dose ECG).
+    </p>
+
+    <div class="gray-box-container">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <!-- Row 1 Col 1 -->
+        <div class="video-wrapper" style="grid-row: 1; grid-column: 1;">
+          <h4 style="font-size: 0.75rem; white-space: nowrap;">1 Lead Missing &middot; Pre-dose</h4>
+          <img src="assets/leads/miss1/pre-dose.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <!-- Row 1 Col 2 -->
+        <div class="video-wrapper" style="grid-row: 1; grid-column: 2;">
+          <h4 style="font-size: 0.75rem; white-space: nowrap;">1 Lead Missing &middot; Generated</h4>
+          <img src="assets/leads/miss1/generation.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <!-- Row 1-2 Col 3: True Post-dose ECG -->
+        <div class="video-wrapper" style="grid-row: 1 / 3; grid-column: 3; display: flex; flex-direction: column; justify-content: center;">
+          <h4>True Post-dose ECG</h4>
+          <img src="assets/leads/miss1/true post-dose ecg.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <!-- Row 2 Col 1 -->
+        <div class="video-wrapper" style="grid-row: 2; grid-column: 1;">
+          <h4 style="font-size: 0.75rem; white-space: nowrap;">2 Leads Missing &middot; Pre-dose</h4>
+          <img src="assets/leads/miss1/true 2 leads miss.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+        <!-- Row 2 Col 2 -->
+        <div class="video-wrapper" style="grid-row: 2; grid-column: 2;">
+          <h4 style="font-size: 0.75rem; white-space: nowrap;">2 Leads Missing &middot; Generated</h4>
+          <img src="assets/leads/miss1/generation_2.png" style="width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Ablation Studies
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Ablation Studies</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; align-items: stretch;">
+      <!-- Left column: two stacked figures -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="content has-text-centered" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
+          <h3 class="title is-5">EPK Loss Ablation</h3>
+          <img src="assets/training/ablation_f2.png" style="width: 100%; border-radius: 10px; border: 1px solid #ddd; flex: 1; object-fit: contain;">
+          <p class="is-size-7" style="color: #555; margin-top: 4px;">
+            Ablation of the External Physiological Knowledge (EPK) loss weight. Higher EPK weighting enforces stronger physiological consistency, reducing generative hallucinations at the cost of slightly increased reconstruction error.
+          </p>
+        </div>
+        <div class="content has-text-centered" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
+          <h3 class="title is-5">Multi-step Rollout Stability</h3>
+          <img src="assets/training/rollout_cropped.png" style="width: 100%; border-radius: 10px; border: 1px solid #ddd; flex: 1; object-fit: contain;">
+          <p class="is-size-7" style="color: #555; margin-top: 4px;">
+            Multi-step rollout stability. Our model maintains predictive accuracy over extended horizons, while baseline methods exhibit compounding drift in generated waveforms.
+          </p>
+        </div>
+      </div>
+      <!-- Right column: single figure, stretch to match left height -->
+      <div class="content has-text-centered" style="display: flex; flex-direction: column;">
+        <h3 class="title is-5">Risk-Aversion Coefficient &lambda;</h3>
+        <img src="assets/training/ablation_lambda.png" style="width: 100%; border-radius: 10px; border: 1px solid #ddd; flex: 1; object-fit: contain;">
+        <p class="is-size-7" style="color: #555; margin-top: 6px;">
+          Effect of the risk-aversion coefficient &lambda; in the uncertainty-aware scoring function S(a) = &mu;<sub>R</sub>(a) + &lambda;&middot;&sigma;<sub>R</sub>(a). Larger &lambda; penalizes high-variance drug candidates, enabling clinicians to trade off expected risk against uncertainty.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Limitations and Impact
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Limitations and Impact</h2>
+
+    <div class="gray-box-container">
+      <div class="content">
+
+        <h3 class="title is-5">Impact</h3>
+        <p>
+          This work proposes an ECG World Model for simulation-based analysis of cardiac
+          interventions, enabling AI systems to explore potential physiological responses
+          under different treatment scenarios. By combining a physiological prior with
+          data-driven generative modeling, the framework supports hypothesis generation
+          and <em>in-silico</em> evaluation of treatment effects.
+        </p>
+
+        <h3 class="title is-5" style="margin-top: 30px;">Limitations</h3>
+        <ol style="padding-left: 20px; line-height: 1.8;">
+          <li>
+            <strong>Data Coverage.</strong> The model is trained on observational and
+            simulated data, which may not fully capture real-world complexity, variability,
+            or rare edge cases. This can lead to deviations from true clinical outcomes
+            under distributional shifts.
+          </li>
+          <li>
+            <strong>Simplified Prior.</strong> The physiological prior is simplified and
+            may be misspecified, limiting its ability to represent full cardiac dynamics,
+            especially in pathological regimes.
+          </li>
+          <li>
+            <strong>Evaluation Scope.</strong> Evaluation focuses on aggregate stability
+            metrics rather than clinical endpoints, and does not fully explain the interaction
+            between prior-driven and data-driven components.
+          </li>
+          <li>
+            <strong>Safety Guarantees.</strong> The model lacks calibrated uncertainty
+            estimates and formal safety guarantees, constraining its use in high-stakes settings.
+          </li>
+        </ol>
+
+        <div class="notification is-warning is-light" style="margin-top: 25px; border-radius: 10px;">
+          <p style="margin: 0;">
+            <strong>Important.</strong> This system is <strong>not</strong> intended as a
+            standalone clinical tool. It should be used only as a decision-support framework
+            requiring expert validation. Generated scenarios should be treated as exploratory
+            hypotheses rather than definitive predictions.
+          </p>
+        </div>
+
+        <p style="margin-top: 25px;">
+          Despite these limitations, the model exhibits stable and bounded behavior across
+          varying levels of prior mismatch, with variability increasing smoothly rather than
+          collapsing. The influence of the prior is also continuous and controllable, as
+          partial prior injection yields intermediate performance. These results suggest a
+          degree of robustness under imperfect assumptions.
+        </p>
+
+        <p>
+          Overall, this work takes a step toward more robust and interpretable generative
+          models for physiological simulation, while underscoring the need for further
+          validation, mechanistic understanding, and safety-aware design prior to real-world
+          deployment.
+        </p>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     Section: Citation
+============================================== -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Citation</h2>
+    <div class="content">
+      <p>If you use this work or find it helpful, please consider citing:</p>
+      <div class="citation-box">
+...</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================
+     JavaScript
+============================================== -->
+<script>
+
+  // ---- Drug Result Image Data ----
+  const drugResults = {
+    0: 'assets/complex/complex1/predose.png',
+    1: 'assets/complex/complex1/postdose_ecg.png'
+  };
+  let currentDrugId = 0;
+  const totalDrugResults = 2;
+
+  function switchDrugResult(id) {
+    currentDrugId = id;
+    const img = document.getElementById('drug-result-img');
+    if (img && drugResults[id]) {
+      img.src = drugResults[id];
+    }
+    document.querySelectorAll('#drug-menu .vertical-item').forEach(item => item.classList.remove('active'));
+    const activeItem = document.querySelector(`#drug-menu .vertical-item[data-id="${id}"]`);
+    if (activeItem) activeItem.classList.add('active');
+  }
+
+  function prevDrugResult() {
+    let newId = currentDrugId - 1;
+    if (newId < 0) newId = totalDrugResults - 1;
+    switchDrugResult(newId);
+  }
+
+  function nextDrugResult() {
+    let newId = currentDrugId + 1;
+    if (newId >= totalDrugResults) newId = 0;
+    switchDrugResult(newId);
+  }
+
+</script>
+
+</body>
+</html>
